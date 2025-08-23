@@ -1,6 +1,8 @@
 <?php
-// 定义根目录
-define('__TYPECHO_ROOT_DIR__', dirname(__DIR__));
+// 定义根目录，但仅在尚未定义时才定义
+if (!defined('__TYPECHO_ROOT_DIR__')) {
+    define('__TYPECHO_ROOT_DIR__', dirname(__DIR__));
+}
 
 // 载入配置支持
 if (!@include_once __TYPECHO_ROOT_DIR__ . '/config.inc.php') {
