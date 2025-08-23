@@ -512,9 +512,13 @@ class Edit extends Contents implements ActionInterface
                     ->where('mid = ?', $category));
 
                 if ($beforeCount) {
-                    $this->db->query($this->db->update('table.metas')
-                        ->expression('count', 'count - 1')
-                        ->where('mid = ?', $category));
+                    // 检查count是否大于0，避免无符号整数下溢
+                    $meta = $this->db->fetchRow($this->db->select('count')->from('table.metas')->where('mid = ?', $category));
+                    if ($meta && $meta['count'] > 0) {
+                        $this->db->query($this->db->update('table.metas')
+                            ->expression('count', 'count - 1')
+                            ->where('mid = ?', $category));
+                    }
                 }
             }
         }
@@ -588,9 +592,13 @@ class Edit extends Contents implements ActionInterface
                     ->where('mid = ?', $tag));
 
                 if ($beforeCount) {
-                    $this->db->query($this->db->update('table.metas')
-                        ->expression('count', 'count - 1')
-                        ->where('mid = ?', $tag));
+                    // 检查count是否大于0，避免无符号整数下溢
+                    $meta = $this->db->fetchRow($this->db->select('count')->from('table.metas')->where('mid = ?', $tag));
+                    if ($meta && $meta['count'] > 0) {
+                        $this->db->query($this->db->update('table.metas')
+                            ->expression('count', 'count - 1')
+                            ->where('mid = ?', $tag));
+                    }
                 }
             }
         }
