@@ -198,9 +198,25 @@ class PostsApi {
         $user = Auth::getUser();
         Permission::require('post_delete', $user, $exist);
 
+        // 获取文章关联的分类和标签，以便更新计数
+        $metas = $d->fetchAll($d->select('m.mid, m.type, m.count')
+            ->from('table.metas AS m')
+            ->join('table.relationships AS r', 'm.mid = r.mid')
+            ->where('r.cid = ?', $cid));
+
+        // 删除关系和文章
         $d->query($d->delete('table.relationships')->where('cid = ?', $cid));
         $d->query($d->delete('table.comments')->where('cid = ?', $cid));
         $d->query($d->delete('table.contents')->where('cid = ?', $cid));
+
+        // 更新分类和标签的计数
+        foreach ($metas as $meta) {
+            if ($exist['status'] === 'publish' && $exist['type'] === 'post' && $meta['count'] > 0) {
+                $d->query($d->update('table.metas')
+                    ->expression('count', 'count - 1')
+                    ->where('mid = ?', $meta['mid']));
+            }
+        }
 
         Response::json(['success' => true]);
     }
